@@ -91,12 +91,15 @@ public class ProductServiceImpl implements ProductService {
         return mapToResponse(productRepository.save(product));
     }
 
-    @Override
-    public void deleteProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product", id));
-        productRepository.delete(product);
-    }
+ @Override
+public void deleteProduct(Long id) {
+    Product product = productRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Product", id));
+
+    product.setStatus(ProductStatus.INACTIVE);
+    product.setIsDeleted(true); 
+    productRepository.save(product);
+}
 
     @Override
     public List<ProductResponse> searchProducts(String name) {

@@ -36,6 +36,14 @@ public abstract class BaseEntity {
     @LastModifiedBy
     private String updatedBy;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "is_deleted")
     private Boolean isDeleted = false;
+
+    public void setIsDeleted(boolean isDeleted) {
+    this.isDeleted = isDeleted;
+}
+
+public boolean getIsDeleted() {
+    return this.isDeleted;
+}
 }
