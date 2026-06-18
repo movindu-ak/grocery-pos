@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<CustomerResponse>> createCustomer(
             @Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -28,6 +30,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<CustomerResponse>> getCustomerById(
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -35,6 +38,7 @@ public class CustomerController {
     }
 
     @GetMapping("/phone/{phone}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<CustomerResponse>> getCustomerByPhone(
             @PathVariable String phone) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -42,12 +46,14 @@ public class CustomerController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<CustomerResponse>>> getAllCustomers() {
         return ResponseEntity.ok(ApiResponse.success(
                 customerService.getAllCustomers()));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<CustomerResponse>> updateCustomer(
             @PathVariable Long id, @Valid @RequestBody CustomerRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Customer updated successfully",
@@ -55,6 +61,7 @@ public class CustomerController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<Void>> deleteCustomer(@PathVariable Long id) {
         customerService.deleteCustomer(id);
         return ResponseEntity.ok(ApiResponse.success(
@@ -62,6 +69,7 @@ public class CustomerController {
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<CustomerResponse>>> searchCustomers(
             @RequestParam String name) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -69,6 +77,7 @@ public class CustomerController {
     }
 
     @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<CustomerResponse>>> getActiveCustomers() {
         return ResponseEntity.ok(ApiResponse.success(
                 customerService.getActiveCustomers()));

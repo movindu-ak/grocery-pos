@@ -16,4 +16,6 @@ public interface AuthService {
     List<UserResponse> getAllUsers();
 
     UserResponse getUserById(Long id);
+
+    void deleteUser(Long id);
 }

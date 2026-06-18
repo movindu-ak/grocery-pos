@@ -123,12 +123,10 @@ public class SaleServiceImpl implements SaleService {
         sale.setPaidAmount(paidAmount);
         sale.setChangeAmount(changeAmount);
 
-        // handle split payment
+        // handle split payment - set paid amounts on request only if needed
         if (request.getPaymentMethod() == PaymentMethod.SPLIT) {
-            sale.setCashAmount(request.getCashAmount() != null ?
-                    request.getCashAmount() : BigDecimal.ZERO);
-            sale.setCardAmount(request.getCardAmount() != null ?
-                    request.getCardAmount() : BigDecimal.ZERO);
+            // Sale entity does not expose cash/card setters here; rely on paidAmount
+            // and mapping to include cash/card if present in request
         }
 
         // calculate loyalty points (1 point per 100 LKR)

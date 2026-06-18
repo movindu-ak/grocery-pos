@@ -104,6 +104,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+public void deleteUser(Long id) {
+    User user = userRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("User", id));
+    userRepository.delete(user);
+}
+
+    @Override
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User", id));

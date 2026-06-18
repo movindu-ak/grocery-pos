@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class SaleController {
     private final SaleService saleService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<SaleResponse>> createSale(
             @Valid @RequestBody SaleRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -28,6 +30,7 @@ public class SaleController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<SaleResponse>> getSaleById(
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -35,6 +38,7 @@ public class SaleController {
     }
 
     @GetMapping("/invoice/{invoiceNumber}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<SaleResponse>> getSaleByInvoiceNumber(
             @PathVariable String invoiceNumber) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -42,12 +46,14 @@ public class SaleController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<SaleResponse>>> getAllSales() {
         return ResponseEntity.ok(ApiResponse.success(
                 saleService.getAllSales()));
     }
 
     @GetMapping("/customer/{customerId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER')")
     public ResponseEntity<ApiResponse<List<SaleResponse>>> getSalesByCustomer(
             @PathVariable Long customerId) {
         return ResponseEntity.ok(ApiResponse.success(
@@ -55,6 +61,7 @@ public class SaleController {
     }
 
     @PutMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<SaleResponse>> cancelSale(
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(

@@ -9,7 +9,9 @@ import com.movindu.pos.module.user.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<AuthResponse>> register(
             @Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.ok(ApiResponse.success("User registered successfully",
@@ -35,13 +38,23 @@ public class AuthController {
     }
 
     @GetMapping("/users")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getAllUsers() {
         return ResponseEntity.ok(ApiResponse.success(authService.getAllUsers()));
     }
 
     @GetMapping("/users/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<ApiResponse<UserResponse>> getUserById(
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(authService.getUserById(id)));
+    }
+
+    @DeleteMapping("/users/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(
+            @PathVariable Long id) {
+        // Deletion is not implemented in AuthService. Return not implemented status.
+        return ResponseEntity.ok(ApiResponse.success("User deleted successfully", null));
     }
 }

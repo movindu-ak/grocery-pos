@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -28,16 +30,19 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER', 'STOREKEEPER')")
     public ResponseEntity<ApiResponse<ProductResponse>> getProductById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(productService.getProductById(id)));
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER', 'STOREKEEPER')")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts() {
         return ResponseEntity.ok(ApiResponse.success(productService.getAllProducts()));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable Long id, @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Product updated successfully",
@@ -45,23 +50,27 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success("Product deleted successfully", null));
     }
 
     @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER', 'STOREKEEPER')")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> searchProducts(
             @RequestParam String name) {
         return ResponseEntity.ok(ApiResponse.success(productService.searchProducts(name)));
     }
 
     @GetMapping("/active")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER', 'STOREKEEPER')")
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getActiveProducts() {
         return ResponseEntity.ok(ApiResponse.success(productService.getActiveProducts()));
     }
 
     @GetMapping("/category/{categoryId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'CASHIER', 'STOREKEEPER')")
 public ResponseEntity<ApiResponse<List<ProductResponse>>> getProductsByCategory(
         @PathVariable Long categoryId) {
     return ResponseEntity.ok(ApiResponse.success(
