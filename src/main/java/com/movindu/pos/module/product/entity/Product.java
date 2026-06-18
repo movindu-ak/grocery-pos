@@ -37,6 +37,9 @@ public class Product extends BaseEntity {
     @Column(unique = true)
     private String barcode;
 
+    @Column(nullable = false)
+    private Integer minimumStock = 10;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status = ProductStatus.ACTIVE;
