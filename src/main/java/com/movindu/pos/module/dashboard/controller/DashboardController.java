@@ -19,21 +19,21 @@ public class DashboardController {
     private final DashboardService dashboardService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<DashboardResponse>> getDashboard() {
         return ResponseEntity.ok(ApiResponse.success(
                 dashboardService.getDashboardSummary()));
     }
 
     @GetMapping("/sales/last-30-days")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<List<DailySalesDataResponse>>> getLast30Days() {
         return ResponseEntity.ok(ApiResponse.success(
                 dashboardService.getLast30DaysSales()));
     }
 
     @GetMapping("/sales/last-7-days")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     public ResponseEntity<ApiResponse<List<DailySalesDataResponse>>> getLast7Days() {
         return ResponseEntity.ok(ApiResponse.success(
                 dashboardService.getLast7DaysSales()));

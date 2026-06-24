@@ -35,4 +35,12 @@ public interface SaleRepository extends JpaRepository<Sale, Long> {
 
     @Query("SELECT COUNT(s) FROM Sale s WHERE s.status = 'COMPLETED' AND s.paymentMethod = :method AND s.saleDate >= :start AND s.saleDate <= :end")
     Long countByPaymentMethod(@Param("method") PaymentMethod method, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+    @Query("SELECT si.product.id, si.product.name, si.product.sku, si.product.barcode, " +
+       "SUM(si.quantity), SUM(si.totalPrice) " +
+       "FROM SaleItem si " +
+       "WHERE si.sale.status = 'COMPLETED' " +
+       "GROUP BY si.product.id, si.product.name, si.product.sku, si.product.barcode " +
+       "ORDER BY SUM(si.quantity) DESC")
+List<Object[]> findTopSellingProducts();
 }

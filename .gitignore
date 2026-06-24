@@ -37,3 +37,5 @@ application-prod.properties
 application-local.properties
 *.env
 .env
+
+grocery-pos-ui/

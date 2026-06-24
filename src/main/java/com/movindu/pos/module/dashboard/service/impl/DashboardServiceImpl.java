@@ -8,22 +8,23 @@ import com.movindu.pos.module.dashboard.dto.response.*;
 import com.movindu.pos.module.dashboard.service.DashboardService;
 import com.movindu.pos.module.product.entity.Product;
 import com.movindu.pos.module.product.repository.ProductRepository;
-import com.movindu.pos.module.sale.entity.Sale;
-import com.movindu.pos.module.sale.entity.SaleItem;
 import com.movindu.pos.module.sale.repository.SaleRepository;
 import com.movindu.pos.module.supplier.repository.SupplierRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
 
     private final SaleRepository saleRepository;
@@ -36,11 +37,21 @@ public class DashboardServiceImpl implements DashboardService {
 
         LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
         LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
-        LocalDateTime weekStart = LocalDateTime.of(LocalDate.now().minusDays(7), LocalTime.MIN);
-        LocalDateTime monthStart = LocalDateTime.of(LocalDate.now().minusDays(30), LocalTime.MIN);
+        LocalDateTime weekStart = LocalDateTime.of(
+                LocalDate.now().minusDays(7), LocalTime.MIN);
+        LocalDateTime monthStart = LocalDateTime.of(
+                LocalDate.now().minusDays(30), LocalTime.MIN);
+        LocalDateTime now = LocalDateTime.now();
 
-        SalesSummaryResponse salesSummary = buildSalesSummary(
-                todayStart, todayEnd, weekStart, monthStart);
+        SalesSummaryResponse salesSummary = new SalesSummaryResponse(
+                saleRepository.countCompletedSalesBetween(todayStart, todayEnd),
+                saleRepository.countCompletedSalesBetween(weekStart, now),
+                saleRepository.countCompletedSalesBetween(monthStart, now),
+                saleRepository.sumRevenueBetween(todayStart, todayEnd),
+                saleRepository.sumRevenueBetween(weekStart, now),
+                saleRepository.sumRevenueBetween(monthStart, now),
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
+        );
 
         PaymentSummaryResponse paymentSummary = buildPaymentSummary(
                 monthStart, todayEnd);
@@ -70,27 +81,6 @@ public class DashboardServiceImpl implements DashboardService {
                 totalCustomers,
                 totalSuppliers,
                 newCustomersThisMonth
-        );
-    }
-
-    private SalesSummaryResponse buildSalesSummary(
-            LocalDateTime todayStart, LocalDateTime todayEnd,
-            LocalDateTime weekStart, LocalDateTime monthStart) {
-
-        LocalDateTime now = LocalDateTime.now();
-
-        Long todayCount = saleRepository.countCompletedSalesBetween(todayStart, todayEnd);
-        Long weeklyCount = saleRepository.countCompletedSalesBetween(weekStart, now);
-        Long monthlyCount = saleRepository.countCompletedSalesBetween(monthStart, now);
-
-        BigDecimal todayRevenue = saleRepository.sumRevenueBetween(todayStart, todayEnd);
-        BigDecimal weeklyRevenue = saleRepository.sumRevenueBetween(weekStart, now);
-        BigDecimal monthlyRevenue = saleRepository.sumRevenueBetween(monthStart, now);
-
-        return new SalesSummaryResponse(
-                todayCount, weeklyCount, monthlyCount,
-                todayRevenue, weeklyRevenue, monthlyRevenue,
-                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
         );
     }
 
@@ -124,33 +114,21 @@ public class DashboardServiceImpl implements DashboardService {
     }
 
     private List<TopProductResponse> getTopProducts() {
-        List<Sale> completedSales = saleRepository.findByStatus(SaleStatus.COMPLETED);
+        List<Object[]> results = saleRepository.findTopSellingProducts();
+        List<TopProductResponse> topProducts = new ArrayList<>();
 
-        Map<Long, TopProductResponse> productMap = new HashMap<>();
-
-        for (Sale sale : completedSales) {
-            for (SaleItem item : sale.getItems()) {
-                Long productId = item.getProduct().getId();
-                TopProductResponse existing = productMap.getOrDefault(productId,
-                        new TopProductResponse(
-                                productId,
-                                item.getProduct().getName(),
-                                item.getProduct().getSku(),
-                                item.getProduct().getBarcode(),
-                                0L,
-                                BigDecimal.ZERO
-                        ));
-                existing.setTotalQuantitySold(
-                        existing.getTotalQuantitySold() + item.getQuantity());
-                existing.setTotalRevenue(
-                        existing.getTotalRevenue().add(item.getTotalPrice()));
-                productMap.put(productId, existing);
-            }
+        for (Object[] row : results) {
+            TopProductResponse response = new TopProductResponse();
+            response.setProductId(((Number) row[0]).longValue());
+            response.setProductName((String) row[1]);
+            response.setProductSku((String) row[2]);
+            response.setBarcode((String) row[3]);
+            response.setTotalQuantitySold(((Number) row[4]).longValue());
+            response.setTotalRevenue((BigDecimal) row[5]);
+            topProducts.add(response);
         }
 
-        return productMap.values().stream()
-                .sorted((a, b) -> b.getTotalQuantitySold()
-                        .compareTo(a.getTotalQuantitySold()))
+        return topProducts.stream()
                 .limit(10)
                 .collect(Collectors.toList());
     }
