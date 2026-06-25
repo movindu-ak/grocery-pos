@@ -1,6 +1,7 @@
 package com.movindu.pos.module.product.entity;
 
 import com.movindu.pos.common.base.BaseEntity;
+import com.movindu.pos.common.enums.DiscountType;
 import com.movindu.pos.common.enums.ProductStatus;
 import com.movindu.pos.module.category.entity.Category;
 import jakarta.persistence.*;
@@ -37,8 +38,20 @@ public class Product extends BaseEntity {
     @Column(unique = true)
     private String barcode;
 
+    // stock level thresholds (Option B - custom per product)
     @Column(nullable = false)
-    private Integer minimumStock = 10;
+    private Integer goodThreshold = 50;
+
+    @Column(nullable = false)
+    private Integer averageThreshold = 20;
+
+    // discount
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DiscountType discountType = DiscountType.NONE;
+
+    @Column(nullable = false)
+    private BigDecimal discountValue = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

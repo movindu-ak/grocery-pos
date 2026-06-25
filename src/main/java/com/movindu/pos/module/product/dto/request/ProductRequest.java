@@ -1,5 +1,7 @@
 package com.movindu.pos.module.product.dto.request;
 
+import com.movindu.pos.common.enums.DiscountType;
+import com.movindu.pos.common.enums.ProductStatus;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -23,7 +25,24 @@ public class ProductRequest {
     @NotBlank(message = "SKU is required")
     private String sku;
 
+    @NotBlank(message = "Barcode is required")
     private String barcode;
 
     private Long categoryId;
+
+    // stock level thresholds
+    @Min(value = 0, message = "Good threshold cannot be negative")
+    private Integer goodThreshold = 50;
+
+    @Min(value = 0, message = "Average threshold cannot be negative")
+    private Integer averageThreshold = 20;
+
+    // discount
+    private DiscountType discountType = DiscountType.NONE;
+
+    @DecimalMin(value = "0.0", message = "Discount value cannot be negative")
+    private BigDecimal discountValue = BigDecimal.ZERO;
+
+    // status
+    private ProductStatus status = ProductStatus.ACTIVE;
 }

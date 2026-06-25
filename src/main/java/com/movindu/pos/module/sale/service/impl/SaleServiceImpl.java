@@ -6,6 +6,7 @@ import com.movindu.pos.common.exception.BusinessException;
 import com.movindu.pos.common.exception.ResourceNotFoundException;
 import com.movindu.pos.module.customer.entity.Customer;
 import com.movindu.pos.module.customer.repository.CustomerRepository;
+import com.movindu.pos.module.inventory.service.InventoryService;
 import com.movindu.pos.module.product.entity.Product;
 import com.movindu.pos.module.product.repository.ProductRepository;
 import com.movindu.pos.module.sale.dto.request.SaleItemRequest;
@@ -33,6 +34,7 @@ public class SaleServiceImpl implements SaleService {
     private final SaleRepository saleRepository;
     private final ProductRepository productRepository;
     private final CustomerRepository customerRepository;
+    private final InventoryService inventoryService;
 
     @Override
     @Transactional
@@ -106,6 +108,8 @@ public class SaleServiceImpl implements SaleService {
             product.setStockQuantity(
                     product.getStockQuantity() - itemRequest.getQuantity());
             productRepository.save(product);
+
+            inventoryService.decreaseStock(product, itemRequest.getQuantity());
         }
 
         // calculate totals
@@ -191,12 +195,14 @@ public class SaleServiceImpl implements SaleService {
         }
 
         // restore stock
-        for (SaleItem item : sale.getItems()) {
-            Product product = item.getProduct();
-            product.setStockQuantity(
-                    product.getStockQuantity() + item.getQuantity());
-            productRepository.save(product);
-        }
+       // restore stock
+for (SaleItem item : sale.getItems()) {
+    Product product = item.getProduct();
+    product.setStockQuantity(
+            product.getStockQuantity() + item.getQuantity());
+    productRepository.save(product);
+    inventoryService.increaseStock(product, item.getQuantity());
+}
 
         // reverse loyalty points
         if (sale.getCustomer() != null) {

@@ -4,6 +4,7 @@ import com.movindu.pos.module.stockreceipt.service.StockReceiptService;
 import com.movindu.pos.common.enums.StockReceiptStatus;
 import com.movindu.pos.common.exception.BusinessException;
 import com.movindu.pos.common.exception.ResourceNotFoundException;
+import com.movindu.pos.module.inventory.service.InventoryService;
 import com.movindu.pos.module.product.entity.Product;
 import com.movindu.pos.module.product.repository.ProductRepository;
 import com.movindu.pos.module.stockreceipt.dto.request.StockReceiptItemRequest;
@@ -31,6 +32,7 @@ public class StockReceiptServiceImpl implements StockReceiptService {
     private final StockReceiptRepository stockReceiptRepository;
     private final ProductRepository productRepository;
     private final SupplierRepository supplierRepository;
+    private final InventoryService inventoryService;
 
     @Override
     @Transactional
@@ -103,6 +105,7 @@ public class StockReceiptServiceImpl implements StockReceiptService {
             product.setPrice(item.getSellingPrice());
 
             productRepository.save(product);
+            inventoryService.increaseStock(product, item.getQuantity());
         }
 
         receipt.setStatus(StockReceiptStatus.CONFIRMED);
